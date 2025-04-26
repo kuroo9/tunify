@@ -16,7 +16,6 @@ const GlobalStyle = createGlobalStyle`
     background-color: #121212;
     color: #fff;
   }
-
   ::selection {
     background: #1db954;
     color: #fff;
@@ -182,7 +181,6 @@ const PlayerControls = styled.div`
         background: ${(props) => props.theme.progressFg};
         border-radius: 2px;
         width: ${(props) => props.progress}%;
-        
         &:hover {
           background: ${(props) => props.theme.primary};
         }
@@ -239,7 +237,6 @@ const VolumeControl = styled.div`
       background: ${(props) => props.theme.progressFg};
       border-radius: 2px;
       width: ${(props) => props.volume * 100}%;
-      
       &:hover {
         background: ${(props) => props.theme.primary};
       }
@@ -281,7 +278,6 @@ const Player = () => {
     nextMusic,
     prevMusic,
   } = SongData() || {};
-
   const audioRef = useRef(null);
   const [volume, setVolume] = useState(0.7);
   const [isMuted, setIsMuted] = useState(false);
@@ -337,9 +333,9 @@ const Player = () => {
     const rect = e.target.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const newVolume = Math.min(1, Math.max(0, offsetX / rect.width));
-    
     setVolume(newVolume);
     setIsMuted(newVolume === 0);
+
     if (audioRef.current) {
       audioRef.current.volume = newVolume;
     }
@@ -349,7 +345,7 @@ const Player = () => {
     const rect = e.target.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const newProgress = Math.min(1, Math.max(0, offsetX / rect.width));
-    
+
     if (audioRef.current && duration > 0) {
       audioRef.current.currentTime = newProgress * duration;
       setProgress(newProgress * duration);
@@ -362,6 +358,7 @@ const Player = () => {
 
   const handleMouseUp = () => {
     setIsSeeking(false);
+
     if (audioRef.current && duration > 0) {
       audioRef.current.currentTime = (progress / duration) * duration;
     }
@@ -369,12 +366,13 @@ const Player = () => {
 
   const toggleMute = () => {
     if (!audioRef.current) return;
-    
+
     if (isMuted) {
       audioRef.current.volume = volume;
     } else {
       audioRef.current.volume = 0;
     }
+
     setIsMuted(!isMuted);
   };
 
@@ -411,19 +409,22 @@ const Player = () => {
                     <FiSkipForward />
                   </button>
                 </div>
+
                 <div className="progress-container">
                   <span className="time">{formatTime(progress)}</span>
-                  <div 
-                    className="progress-bar" 
+                  <div
+                    className="progress-bar"
                     onClick={handleProgressClick}
+                    onMouseDown={handleMouseDown}
+                    onMouseUp={handleMouseUp}
                     progress={(progress / duration) * 100 || 0}
                   >
-                    <div 
-                      className="progress" 
+                    <div
+                      className="progress"
                       style={{ width: `${(progress / duration) * 100 || 0}%` }}
                     />
-                    <div 
-                      className="progress-handle" 
+                    <div
+                      className="progress-handle"
                       style={{ left: `${(progress / duration) * 100 || 0}%` }}
                     />
                   </div>
@@ -436,17 +437,17 @@ const Player = () => {
                 <button className="volume-icon" onClick={toggleMute}>
                   {isMuted || volume === 0 ? <FaVolumeMute /> : <FaVolumeUp />}
                 </button>
-                <div 
-                  className="volume-bar" 
+                <div
+                  className="volume-bar"
                   onClick={handleVolumeChange}
                   volume={isMuted ? 0 : volume}
                 >
-                  <div 
-                    className="volume-progress" 
+                  <div
+                    className="volume-progress"
                     style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
                   />
-                  <div 
-                    className="volume-handle" 
+                  <div
+                    className="volume-handle"
                     style={{ left: `${(isMuted ? 0 : volume) * 100}%` }}
                   />
                 </div>
@@ -458,13 +459,6 @@ const Player = () => {
                 src={song.audio.url}
                 {...(isPlaying ? { autoPlay: true } : {})}
                 volume={isMuted ? 0 : volume}
-                onVolumeChange={(e) => {
-                  if (e.target.volume === 0) {
-                    setIsMuted(true);
-                  } else {
-                    setIsMuted(false);
-                  }
-                }}
               />
             </PlayerContainer>
           )}

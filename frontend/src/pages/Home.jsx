@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { SongData } from "../context/Song";
 import AlbumItem from "../components/AlbumItem";
 import SongItem from "../components/SongItem";
 import styled, { ThemeProvider, createGlobalStyle } from "styled-components";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -41,6 +41,9 @@ const blackGreyTheme = {
 
 const Container = styled.div`
   padding: 24px;
+  border-radius: 16px;
+  background: ${props => props.theme.secondary};
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const SectionTitle = styled(motion.h1)`
@@ -57,23 +60,43 @@ const SectionTitle = styled(motion.h1)`
   }
 `;
 
-const ItemList = styled(motion.div)`
-  display: flex;
-  overflow-x: auto;
-  scroll-behavior: smooth;
+const ItemGrid = styled(motion.div)`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
   padding: 0 16px;
+  border-radius: 16px;
+  background: ${props => props.theme.secondary};
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+`;
 
-  &::-webkit-scrollbar {
-    height: 6px;
-  }
+// Loading Animation Styles
+const LoadingContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  flex-direction: column;
+  color: ${props => props.theme.mutedText};
+  font-size: 18px;
+`;
 
-  &::-webkit-scrollbar-thumb {
-    background: ${props => props.theme.accent};
-    border-radius: 4px;
-  }
+const LoadingSpinner = styled.div`
+  border: 4px solid ${props => props.theme.accent};
+  border-top: 4px solid transparent;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
 
-  &::-webkit-scrollbar-track {
-    background: ${props => props.theme.secondary};
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -82,7 +105,25 @@ const DEFAULT_ALBUM_IMAGE = "https://via.placeholder.com/150";
 const DEFAULT_SONG_IMAGE = "https://via.placeholder.com/150";
 
 const Home = () => {
-  const { songs, albums } = SongData();
+  const { songs, albums, loading } = SongData();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate a loading state
+  useEffect(() => {
+    if (!loading) {
+      setTimeout(() => setIsLoading(false), 1000); // Simulate data fetching delay
+    }
+  }, [loading]);
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeInOut" } },
+  };
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeInOut" } },
+  };
 
   return (
     <ThemeProvider theme={blackGreyTheme}>
@@ -91,76 +132,94 @@ const Home = () => {
         <Container>
           {/* Featured Charts Section */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            variants={fadeIn}
+            initial="hidden"
+            animate="visible"
           >
             <SectionTitle
-              initial={{ y: -50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              variants={fadeInUp}
+              initial="hidden"
+              animate="visible"
             >
               Featured Charts
             </SectionTitle>
-            <ItemList
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              {albums.length > 0 ? (
-                albums.map((album, i) => {
-                  const imageUrl = album?.thumbnail?.url || DEFAULT_ALBUM_IMAGE;
-                  return (
-                    <AlbumItem
-                      key={i}
-                      image={imageUrl}
-                      name={album.title || "Unknown Album"}
-                      desc={album.description || "No description available"}
-                      id={album._id || `album-${i}`}
-                    />
-                  );
-                })
-              ) : (
-                <p style={{ color: blackGreyTheme.mutedText }}>No albums available</p>
-              )}
-            </ItemList>
+
+            {isLoading ? (
+              <LoadingContainer>
+                <LoadingSpinner />
+                <p>Loading Albums...</p>
+              </LoadingContainer>
+            ) : (
+              <ItemGrid
+                variants={fadeInUp}
+                initial="hidden"
+                animate="visible"
+                transition={{ staggerChildren: 0.2 }}
+              >
+                {albums.length > 0 ? (
+                  albums.map((album, i) => {
+                    const imageUrl = album?.thumbnail?.url || DEFAULT_ALBUM_IMAGE;
+                    return (
+                      <AlbumItem
+                        key={i}
+                        image={imageUrl}
+                        name={album.title || "Unknown Album"}
+                        desc={album.description || "No description available"}
+                        id={album._id || `album-${i}`}
+                      />
+                    );
+                  })
+                ) : (
+                  <p style={{ color: blackGreyTheme.mutedText }}>No albums available</p>
+                )}
+              </ItemGrid>
+            )}
           </motion.div>
 
           {/* Today's Biggest Hits Section */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            variants={fadeIn}
+            initial="hidden"
+            animate="visible"
           >
             <SectionTitle
-              initial={{ y: -50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+              variants={fadeInUp}
+              initial="hidden"
+              animate="visible"
             >
               Today's Biggest Hits
             </SectionTitle>
-            <ItemList
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              {songs.length > 0 ? (
-                songs.map((song, i) => {
-                  const imageUrl = song?.thumbnail?.url || DEFAULT_SONG_IMAGE;
-                  return (
-                    <SongItem
-                      key={i}
-                      image={imageUrl}
-                      name={song.title || "Unknown Song"}
-                      desc={song.description || "No description available"}
-                      id={song._id || `song-${i}`}
-                    />
-                  );
-                })
-              ) : (
-                <p style={{ color: blackGreyTheme.mutedText }}>No songs available</p>
-              )}
-            </ItemList>
+
+            {isLoading ? (
+              <LoadingContainer>
+                <LoadingSpinner />
+                <p>Loading Songs...</p>
+              </LoadingContainer>
+            ) : (
+              <ItemGrid
+                variants={fadeInUp}
+                initial="hidden"
+                animate="visible"
+                transition={{ staggerChildren: 0.2 }}
+              >
+                {songs.length > 0 ? (
+                  songs.map((song, i) => {
+                    const imageUrl = song?.thumbnail?.url || DEFAULT_SONG_IMAGE;
+                    return (
+                      <SongItem
+                        key={i}
+                        image={imageUrl}
+                        name={song.title || "Unknown Song"}
+                        desc={song.description || "No description available"}
+                        id={song._id || `song-${i}`}
+                      />
+                    );
+                  })
+                ) : (
+                  <p style={{ color: blackGreyTheme.mutedText }}>No songs available</p>
+                )}
+              </ItemGrid>
+            )}
           </motion.div>
         </Container>
       </Layout>

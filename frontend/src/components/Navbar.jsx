@@ -16,26 +16,25 @@ const Navbar = () => {
       <StyledDiv className="flex items-center gap-2">
         <img
           src={assets.arrow_left}
-          className="w-8 bg-black p-2 rounded-2xl cursor-pointer"
+          className="w-8 bg-grey p-2 rounded-2xl cursor-pointer"
           alt=""
           onClick={() => navigate(-1)}
         />
         <img
           src={assets.arrow_right}
-          className="w-8 bg-black p-2 rounded-2xl cursor-pointer"
+          className="w-8 bg-grey p-2 rounded-2xl cursor-pointer"
           alt=""
           onClick={() => navigate(+1)}
         />
       </StyledDiv>
       <LogoContainer>
         <Logo>
-          <FontAwesomeIcon icon={faMusic} />
+          <FontAwesomeIcon icon={faMusic} color="#999" />
           <LogoText>TUNE-IN</LogoText>
         </Logo>
       </LogoContainer>
       <StyledDiv className="flex items-center gap-4">
-       
-        <StyledButton onClick={logoutUser} className="bg-white text-black text-[15px] px-4 py-1 rounded-2xl cursor-pointer">
+        <StyledButton onClick={logoutUser} className="bg-grey text-white text-[15px] px-4 py-1 rounded-2xl cursor-pointer">
           Logout
         </StyledButton>
       </StyledDiv>
@@ -57,11 +56,11 @@ const LogoContainer = styled(motion.div)`
   align-items: center;
   font-size: 24px;
   font-weight: bold;
-  color: #28a745;
 `;
 
 const LogoText = styled.span`
   margin-left: 8px;
+  color: #999; /* Grey color */
 `;
 
 const Logo = styled(motion.div)`
@@ -77,14 +76,14 @@ const StyledDiv = styled.div`
 `;
 
 const StyledButton = styled.button`
-  background-color: white;
-  color: black;
+  background-color: #333;
+  color: #fff;
   border: none;
   padding: 4px 8px;
   border-radius: 12px;
   cursor: pointer;
   &:hover {
-    background-color: #e0e0e0;
+    background-color: #555;
   }
 `;
 
